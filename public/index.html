@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Task Management</title>
     <style>
         body {
@@ -16,54 +16,52 @@
             margin: auto;
             padding: 20px;
             background: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             border-radius: 8px;
         }
-        h1 {
+        h1, h2 {
             text-align: center;
             color: #333;
         }
         h2 {
-            color: #444;
             border-bottom: 2px solid #4285f4;
             padding-bottom: 5px;
+            margin-top: 30px;
         }
-        textarea, input, select {
+        textarea, input, select, button {
             width: 100%;
             padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            margin-top: 10px;
+            margin-bottom: 20px;
             font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
         }
         button {
             background-color: #4285f4;
             color: white;
             border: none;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
             font-size: 16px;
             transition: background-color 0.3s;
-            width: 100%;
+            cursor: pointer;
         }
         button:hover {
             background-color: #3367d6;
         }
         pre {
-            background: #f5f5f5;
+            background-color: #f5f5f5;
             padding: 10px;
             border-radius: 4px;
-            overflow-x: auto;
-            white-space: pre-wrap; /* Allows wrapping of long lines */
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Task Management</h1>
+
         <h2>Add Tasks</h2>
-        <textarea id="taskInput" rows="10" placeholder='Enter tasks as JSON array (e.g., [{"taskTitle": "Task 1", "taskDescription": "Description", "dueDate": "2025-07-10", "status": "pending", "assignedTo": "Alice"}])'></textarea>
+        <textarea id="taskInput" rows="8" placeholder='Paste valid JSON array'></textarea>
         <button onclick="addTasks()">Add Tasks</button>
 
         <h2>Task Count by Status</h2>
@@ -71,7 +69,7 @@
         <pre id="statusCount"></pre>
 
         <h2>Tasks Assigned to a Member</h2>
-        <input type="text" id="memberName" placeholder="Enter member name">
+        <input type="text" id="memberName" placeholder="Enter member name" />
         <button onclick="getTasksForMember()">Get Tasks</button>
         <pre id="memberTasks"></pre>
 
@@ -79,25 +77,29 @@
         <select id="statusToDelete">
             <option value="">Select status</option>
             <option value="pending">Pending</option>
-            <option value="in-progress">In Progress</option> 
+            <option value="in-progress">In Progress</option>
             <option value="completed">Completed</option>
         </select>
-        <button onclick="deleteTasksByStatus()">Delete All with Status</button>
+        <button onclick="deleteTasksByStatus()">Delete Tasks</button>
     </div>
 
     <script>
         async function addTasks() {
             const taskInput = document.getElementById('taskInput').value;
             try {
+                const taskArray = JSON.parse(taskInput);
+                if (!Array.isArray(taskArray)) throw new Error("Input must be a JSON array");
+
                 const response = await fetch('http://localhost:3000/tasks', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: taskInput
+                    body: JSON.stringify(taskArray)
                 });
                 const data = await response.json();
-                alert(`${data.insertedCount} tasks added.`);
+                alert(`${data.insertedCount} tasks added successfully.`);
             } catch (error) {
-                console.error('Error:', error);
+                console.error(error);
+                alert('Invalid JSON or server error.');
             }
         }
 
@@ -107,25 +109,31 @@
                 const data = await response.json();
                 document.getElementById('statusCount').innerText = JSON.stringify(data, null, 2);
             } catch (error) {
-                console.error('Error:', error);
+                console.error(error);
+                alert('Could not fetch task count.');
             }
         }
 
         async function getTasksForMember() {
-            const memberName = document.getElementById('memberName').value;
+            const memberName = document.getElementById('memberName').value.trim();
+            if (!memberName) {
+                alert('Please enter a member name.');
+                return;
+            }
             try {
-                const response = await fetch(`http://localhost:3000/tasks/assignedTo/${memberName}`);
+                const response = await fetch(`http://localhost:3000/tasks/assignedTo/${encodeURIComponent(memberName)}`);
                 const data = await response.json();
                 document.getElementById('memberTasks').innerText = JSON.stringify(data, null, 2);
             } catch (error) {
-                console.error('Error:', error);
+                console.error(error);
+                alert('Could not fetch tasks.');
             }
         }
 
         async function deleteTasksByStatus() {
             const status = document.getElementById('statusToDelete').value;
             if (!status) {
-                alert('Please select a status');
+                alert('Please select a status to delete.');
                 return;
             }
             try {
@@ -133,10 +141,10 @@
                     method: 'DELETE'
                 });
                 const data = await response.json();
-                alert(`${data.deletedCount} tasks deleted`);
+                alert(`${data.deletedCount} tasks deleted.`);
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error deleting tasks');
+                console.error(error);
+                alert('Deletion failed.');
             }
         }
     </script>
