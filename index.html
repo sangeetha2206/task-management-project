@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        h2 {
+            color: #444;
+            border-bottom: 2px solid #4285f4;
+            padding-bottom: 5px;
+        }
+        textarea, input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap; /* Allows wrapping of long lines */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Task Management</h1>
+        <h2>Add Tasks</h2>
+        <textarea id="taskInput" rows="10" placeholder='Enter tasks as JSON array (e.g., [{"taskTitle": "Task 1", "taskDescription": "Description", "dueDate": "2025-07-10", "status": "pending", "assignedTo": "Alice"}])'></textarea>
+        <button onclick="addTasks()">Add Tasks</button>
+
+        <h2>Task Count by Status</h2>
+        <button onclick="getTaskCount()">Get Task Count</button>
+        <pre id="statusCount"></pre>
+
+        <h2>Tasks Assigned to a Member</h2>
+        <input type="text" id="memberName" placeholder="Enter member name">
+        <button onclick="getTasksForMember()">Get Tasks</button>
+        <pre id="memberTasks"></pre>
+
+        <h2>Delete Tasks by Status</h2>
+        <select id="statusToDelete">
+            <option value="">Select status</option>
+            <option value="pending">Pending</option>
+            <option value="in-progress">In Progress</option> 
+            <option value="completed">Completed</option>
+        </select>
+        <button onclick="deleteTasksByStatus()">Delete All with Status</button>
+    </div>
+
+    <script>
+        async function addTasks() {
+            const taskInput = document.getElementById('taskInput').value;
+            try {
+                const response = await fetch('http://localhost:3000/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: taskInput
+                });
+                const data = await response.json();
+                alert(`${data.insertedCount} tasks added.`);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function getTaskCount() {
+            try {
+                const response = await fetch('http://localhost:3000/tasks/status');
+                const data = await response.json();
+                document.getElementById('statusCount').innerText = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function getTasksForMember() {
+            const memberName = document.getElementById('memberName').value;
+            try {
+                const response = await fetch(`http://localhost:3000/tasks/assignedTo/${memberName}`);
+                const data = await response.json();
+                document.getElementById('memberTasks').innerText = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function deleteTasksByStatus() {
+            const status = document.getElementById('statusToDelete').value;
+            if (!status) {
+                alert('Please select a status');
+                return;
+            }
+            try {
+                const response = await fetch(`http://localhost:3000/tasks/status/${status}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                alert(`${data.deletedCount} tasks deleted`);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error deleting tasks');
+            }
+        }
+    </script>
+</body>
+</html>
