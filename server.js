@@ -24,12 +24,17 @@ app.get('/', (req, res) => {
 // Add tasks
 app.post('/tasks', async (req, res) => {
     try {
+        if (!Array.isArray(req.body)) {
+            return res.status(400).json({ error: "Request body must be a JSON array" });
+        }
         const result = await collection.insertMany(req.body);
         res.status(201).json({ insertedCount: result.insertedCount });
     } catch (error) {
+        console.error("Insert error:", error);
         res.status(500).json({ error: error.message });
     }
 });
+
 
 // Get task count by status
 app.get('/tasks/status', async (req, res) => {
