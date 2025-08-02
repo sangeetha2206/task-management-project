@@ -85,23 +85,33 @@
 
     <script>
         async function addTasks() {
-            const taskInput = document.getElementById('taskInput').value;
-            try {
-                const taskArray = JSON.parse(taskInput);
-                if (!Array.isArray(taskArray)) throw new Error("Input must be a JSON array");
+    const taskInput = document.getElementById('taskInput').value;
+    try {
+        console.log("Raw input:", taskInput); // debug
 
-                const response = await fetch('http://localhost:3000/tasks', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(taskArray)
-                });
-                const data = await response.json();
-                alert(`${data.insertedCount} tasks added successfully.`);
-            } catch (error) {
-                console.error(error);
-                alert('Invalid JSON or server error.');
-            }
+        const taskArray = JSON.parse(taskInput);
+        console.log("Parsed input:", taskArray); // debug
+
+        if (!Array.isArray(taskArray)) throw new Error("Input must be a JSON array");
+
+        const response = await fetch('http://localhost:3000/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(taskArray)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Server error');
         }
+
+        const data = await response.json();
+        alert(`${data.insertedCount} tasks added successfully.`);
+    } catch (error) {
+        console.error("Caught error:", error);
+        alert(error.message);
+    }
+}
 
         async function getTaskCount() {
             try {
