@@ -94,7 +94,7 @@
 
         if (!Array.isArray(taskArray)) throw new Error("Input must be a JSON array");
 
-        const response = await fetch('http://localhost:10000/tasks', {
+        const response = await fetch('http://localhost:3000/tasks', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(taskArray)
@@ -115,7 +115,7 @@
 
         async function getTaskCount() {
             try {
-                const response = await fetch('http://localhost:10000/tasks/status');
+                const response = await fetch('http://localhost:3000/tasks/status');
                 const data = await response.json();
                 document.getElementById('statusCount').innerText = JSON.stringify(data, null, 2);
             } catch (error) {
@@ -131,7 +131,7 @@
                 return;
             }
             try {
-                const response = await fetch(`http://localhost:10000/tasks/assignedTo/${encodeURIComponent(memberName)}`);
+                const response = await fetch(`http://localhost:3000/tasks/assignedTo/${encodeURIComponent(memberName)}`);
                 const data = await response.json();
                 document.getElementById('memberTasks').innerText = JSON.stringify(data, null, 2);
             } catch (error) {
@@ -147,7 +147,7 @@
                 return;
             }
             try {
-                const response = await fetch(`http://localhost:10000/tasks/status/${status}`, {
+                const response = await fetch(`http://localhost:3000/tasks/status/${status}`, {
                     method: 'DELETE'
                 });
                 const data = await response.json();
