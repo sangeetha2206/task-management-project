@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const port = process.env.PORT || 10000;
+const port = process.env.PORT || 3000;
 
 // Use environment variable in real apps for safety
 const uri = 'mongodb+srv://sangeethamagesh062004:sangeetha8144@cluster0.ei021qz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
